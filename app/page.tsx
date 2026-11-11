@@ -1,3 +1,4 @@
+"use client";
 
 import {
   CreditCard,
@@ -12,7 +13,35 @@ import StatCard from "@/components/stat-card";
 import SpendingChart from "@/components/spending-chart";
 import SubscriptionList from "@/components/subscription-list";
 
+import { useSubscriptions } from "@/context/subscription-context";
+
+import {
+  calculateMonthlySpending,
+  calculateAnnualSpending,
+  calculateSavings,
+} from "@/lib/calculations";
+
 export default function Home() {
+  const { selected, cancelledIds, isLoaded } = useSubscriptions();
+
+  const monthly = calculateMonthlySpending(selected);
+  const annual = calculateAnnualSpending(selected);
+  const potentialSavings = calculateSavings(selected, cancelledIds);
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-[#101713] p-10 text-white">
+        Loading dashboard...
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#101713]">
       <Sidebar />
@@ -24,29 +53,29 @@ export default function Home() {
         <section className="grid grid-cols-4 gap-5">
           <StatCard
             title="Monthly Spending"
-            value="$147.96"
+            value={formatPrice(monthly)}
             description="Your recurring monthly costs"
             icon={DollarSign}
           />
 
           <StatCard
             title="Annual Spending"
-            value="$1,775.52"
+            value={formatPrice(annual)}
             description="Projected yearly expenses"
             icon={CreditCard}
           />
 
           <StatCard
             title="Active Subscriptions"
-            value="8"
+            value={String(selected.length)}
             description="Currently tracking"
             icon={TrendingUp}
           />
 
           <StatCard
             title="Potential Savings"
-            value="$45.00"
-            description="Possible monthly savings"
+            value={formatPrice(potentialSavings)}
+            description="Monthly savings if selected subscriptions are cancelled"
             icon={PiggyBank}
           />
         </section>
@@ -64,12 +93,14 @@ export default function Home() {
           </p>
 
           <h2 className="mt-2 text-2xl font-bold text-white">
-            {"You're spending $1,775.52 every year."}
+            {"You're spending "}
+            {formatPrice(annual)} every year.
           </h2>
 
           <p className="mt-2 text-sm text-gray-400">
-            Small changes today can make a big difference
-            to your financial future.
+            {selected.length === 0
+              ? "Start adding subscriptions to discover your spending."
+              : "Review your subscriptions and find opportunities to save."}
           </p>
         </section>
       </div>

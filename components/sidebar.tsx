@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation";
 const menuItems = [
   { name: "Overview", icon: LayoutDashboard, href: "/" },
   { name: "My Subscriptions", icon: CreditCard, href: "/subscriptions" },
-  { name: "Savings Simulator", icon: TrendingUp, href: "/savings-simulator" },
+  { name: "Savings Simulator", icon: TrendingUp, href: "/savings" },
   { name: "Investment Growth", icon: PiggyBank, href: "/investment-growth" },
 ];
 

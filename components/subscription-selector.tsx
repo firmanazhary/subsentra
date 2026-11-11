@@ -3,9 +3,8 @@
 
 import { useMemo, useState } from "react";
 import { Search, Plus, Check, Trash2 } from "lucide-react";
-
+import { useSubscriptions } from "@/context/subscription-context";
 import { subscriptions } from "@/data/subscriptions";
-import type { UserSubscription } from "@/types/subscription";
 
 const categories = [
   "All",
@@ -28,7 +27,7 @@ export default function SubscriptionSelector() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const [selected, setSelected] = useState<UserSubscription[]>([]);
+  const { selected, setSelected, isLoaded } = useSubscriptions();
 
   const filteredSubscriptions = useMemo(() => {
     return subscriptions.filter((sub) => {
@@ -87,6 +86,13 @@ export default function SubscriptionSelector() {
       )
     );
   };
+  if (!isLoaded) {
+  return (
+    <div className="py-20 text-center text-gray-400">
+      Loading your subscriptions...
+    </div>
+  );
+}
 
   return (
     <div className="space-y-8">
