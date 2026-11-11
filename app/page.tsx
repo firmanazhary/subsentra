@@ -14,6 +14,7 @@ import SpendingChart from "@/components/spending-chart";
 import SubscriptionList from "@/components/subscription-list";
 
 import { useSubscriptions } from "@/context/subscription-context";
+import { useI18n } from "@/context/i18n-context";
 
 import {
   calculateMonthlySpending,
@@ -23,84 +24,79 @@ import {
 
 export default function Home() {
   const { selected, cancelledIds, isLoaded } = useSubscriptions();
+  const { t, formatPrice } = useI18n();
 
   const monthly = calculateMonthlySpending(selected);
   const annual = calculateAnnualSpending(selected);
   const potentialSavings = calculateSavings(selected, cancelledIds);
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#101713] p-10 text-white">
-        Loading dashboard...
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F6F4] p-10 text-gray-900 transition-colors dark:bg-[#101713] dark:text-white">
+        {t("overview.loading")}
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#101713]">
+    <main className="min-h-screen bg-[#F4F6F4] text-gray-900 transition-colors duration-200 dark:bg-[#101713] dark:text-white">
       <Sidebar />
 
-      <div className="ml-64 p-8">
+      {/* Main Content Area: Responsive margins and padding */}
+      <div className="ml-0 min-w-0 p-4 pt-20 sm:p-6 sm:pt-22 lg:ml-64 lg:p-8 lg:pt-8 transition-all">
         <Header />
 
-        {/* Overview Cards */}
-        <section className="grid grid-cols-4 gap-5">
+        {/* Overview Cards: 1 col on mobile, 2 col on tablet, 4 col on desktop */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           <StatCard
-            title="Monthly Spending"
+            title={t("overview.monthlySpending")}
             value={formatPrice(monthly)}
-            description="Your recurring monthly costs"
+            description={t("overview.monthlyDesc")}
             icon={DollarSign}
           />
 
           <StatCard
-            title="Annual Spending"
+            title={t("overview.annualSpending")}
             value={formatPrice(annual)}
-            description="Projected yearly expenses"
+            description={t("overview.annualDesc")}
             icon={CreditCard}
           />
 
           <StatCard
-            title="Active Subscriptions"
+            title={t("overview.activeSubs")}
             value={String(selected.length)}
-            description="Currently tracking"
+            description={t("overview.activeDesc")}
             icon={TrendingUp}
           />
 
           <StatCard
-            title="Potential Savings"
+            title={t("overview.potentialSavings")}
             value={formatPrice(potentialSavings)}
-            description="Monthly savings if selected subscriptions are cancelled"
+            description={t("overview.savingsDesc")}
             icon={PiggyBank}
           />
         </section>
 
-        {/* Analytics */}
-        <section className="mt-8 grid grid-cols-2 gap-5">
+        {/* Analytics: 1 col on mobile/tablet, 2 cols on desktop */}
+        <section className="mt-6 sm:mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <SpendingChart />
           <SubscriptionList />
         </section>
 
         {/* Savings Banner */}
-        <section className="mt-8 rounded-2xl border border-[#B8F27C]/20 bg-[#B8F27C]/10 p-6">
-          <p className="text-sm text-[#B8F27C]">
-            Your money insight
+        <section className="mt-6 sm:mt-8 rounded-2xl border border-[#3B871D]/25 bg-[#B8F27C]/30 p-5 sm:p-6 shadow-xs transition dark:border-[#B8F27C]/20 dark:bg-[#B8F27C]/10">
+          <p className="text-xs sm:text-sm font-semibold text-[#1F5410] dark:text-[#B8F27C]">
+            {t("overview.insight")}
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-white">
-            {"You're spending "}
-            {formatPrice(annual)} every year.
+          <h2 className="mt-2 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            {t("overview.annualInsight", { amount: formatPrice(annual) })}
           </h2>
 
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             {selected.length === 0
-              ? "Start adding subscriptions to discover your spending."
-              : "Review your subscriptions and find opportunities to save."}
+              ? t("overview.insightEmpty")
+              : t("overview.insightActive")}
           </p>
         </section>
       </div>

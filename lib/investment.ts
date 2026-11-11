@@ -1,4 +1,3 @@
-
 export type InvestmentProjection = {
   month: number;
   year: number;
@@ -43,6 +42,49 @@ export function calculateInvestmentGrowth(
   }
 
   return projections;
+}
+
+export function generateGrowthSeries(
+  monthlyContribution: number,
+  annualReturn: number,
+  years: number
+) {
+  const full = calculateInvestmentGrowth(monthlyContribution, annualReturn, years);
+  const yearly: {
+    year: number;
+    contributed: number;
+    investmentValue: number;
+    profit: number;
+  }[] = [];
+
+  for (let y = 1; y <= years; y++) {
+    const item = full[y * 12];
+    if (item) {
+      yearly.push({
+        year: y,
+        contributed: Math.round(item.contributed),
+        investmentValue: Math.round(item.investmentValue),
+        profit: Math.round(item.profit),
+      });
+    }
+  }
+
+  return yearly;
+}
+
+export function getFinalProjection(
+  monthlyContribution: number,
+  annualReturn: number,
+  years: number
+) {
+  const full = calculateInvestmentGrowth(monthlyContribution, annualReturn, years);
+  const finalItem = full[full.length - 1];
+
+  return {
+    contributed: finalItem ? Math.round(finalItem.contributed) : 0,
+    investmentValue: finalItem ? Math.round(finalItem.investmentValue) : 0,
+    profit: finalItem ? Math.round(finalItem.profit) : 0,
+  };
 }
 
 export function formatInvestmentCurrency(amount: number) {

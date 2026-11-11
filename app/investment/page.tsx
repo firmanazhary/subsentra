@@ -1,16 +1,14 @@
-
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
+  Info,
+  PiggyBank,
   TrendingUp,
   Wallet,
-  PiggyBank,
-  Info,
 } from "lucide-react";
-
 import {
   Bar,
   CartesianGrid,
@@ -25,131 +23,134 @@ import {
 
 import Sidebar from "@/components/sidebar";
 import { useSubscriptions } from "@/context/subscription-context";
+import { useTheme } from "@/context/theme-context";
+import { useI18n } from "@/context/i18n-context";
 import { calculateSavings } from "@/lib/calculations";
 import {
-  calculateInvestmentGrowth,
-  formatInvestmentCurrency,
+  generateGrowthSeries,
+  getFinalProjection,
 } from "@/lib/investment";
-
-const periods = [1, 3, 5, 10, 20];
 
 export default function InvestmentPage() {
   const { selected, cancelledIds, isLoaded } = useSubscriptions();
+  const { theme } = useTheme();
+  const { t, formatPrice, currency } = useI18n();
+
+  const [years, setYears] = useState(5);
+  const [annualReturn, setAnnualReturn] = useState(8);
+  const [monthlyContribution, setMonthlyContribution] = useState<number | null>(
+    null
+  );
 
   const potentialSavings = calculateSavings(selected, cancelledIds);
+  const contribution =
+    monthlyContribution !== null ? monthlyContribution : potentialSavings;
 
-  const [monthlyContribution, setMonthlyContribution] =
-    useState<number | null>(null);
-
-  const [annualReturn, setAnnualReturn] = useState(8);
-  const [years, setYears] = useState(5);
-
-  // Use potential savings as the initial monthly contribution.
-  const contribution = monthlyContribution ?? potentialSavings;
-
-  const projections = useMemo(
-    () =>
-      calculateInvestmentGrowth(
-        contribution,
-        annualReturn,
-        years
-      ),
-    [contribution, annualReturn, years]
+  const chartData = generateGrowthSeries(
+    contribution,
+    annualReturn,
+    years
+  );
+  const finalProjection = getFinalProjection(
+    contribution,
+    annualReturn,
+    years
   );
 
-  const finalProjection = projections[projections.length - 1];
-
-  // Display one data point per year on the chart.
-  const chartData = projections.filter(
-    (point) => point.month % 12 === 0
-  );
+  const periods = [1, 3, 5, 10, 15, 20];
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#101713] p-10 text-white">
-        Loading investment simulator...
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F6F4] p-10 text-gray-900 transition-colors dark:bg-[#101713] dark:text-white">
+        {t("invest.loading")}
       </div>
     );
   }
 
+  const isDark = theme === "dark";
+  const isIDR = currency === "IDR";
+  const isJPY = currency === "JPY";
+
+  const defaultContributionBase = isIDR ? 2000000 : isJPY ? 20000 : 200;
+  const step = isIDR ? 50000 : isJPY ? 500 : 5;
+  const sliderMax = Math.max(
+    defaultContributionBase,
+    Math.ceil(Math.max(potentialSavings, contribution) / step) * step * 1.5
+  );
+
   return (
-    <main className="min-h-screen bg-[#101713] text-white">
+    <main className="min-h-screen bg-[#F4F6F4] text-gray-900 transition-colors duration-200 dark:bg-[#101713] dark:text-white">
       <Sidebar />
 
-      <div className="ml-64 p-8">
+      <div className="ml-0 min-w-0 p-4 pt-20 sm:p-6 sm:pt-22 lg:ml-64 lg:p-8 lg:pt-8 transition-all">
         <Link
           href="/"
-          className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-[#B8F27C]"
+          className="mb-4 sm:mb-5 inline-flex items-center gap-2 text-xs sm:text-sm text-gray-500 transition hover:text-[#2F7317] dark:text-gray-400 dark:hover:text-[#B8F27C]"
         >
           <ArrowLeft size={16} />
-          Back to Dashboard
+          {t("invest.back")}
         </Link>
 
-        <div className="mb-8">
-          <p className="text-sm font-medium text-[#B8F27C]">
-            BUILD YOUR FUTURE
+        <div className="mb-6 sm:mb-8">
+          <p className="text-xs sm:text-sm font-semibold text-[#2F7317] dark:text-[#B8F27C]">
+            {t("invest.badge")}
           </p>
-          <h1 className="mt-2 text-3xl font-bold">
-            Investment Growth
+          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            {t("invest.title")}
           </h1>
-          <p className="mt-2 max-w-2xl text-gray-400">
-            See what your subscription savings could become when
-            invested consistently over time.
+          <p className="mt-1 text-xs sm:text-sm max-w-2xl text-gray-600 dark:text-gray-400">
+            {t("invest.subtitle")}
           </p>
         </div>
 
-        {/* Summary cards */}
-        <section className="grid grid-cols-3 gap-5">
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-[#B8F27C]">
+        {/* Summary cards: 1 col on mobile, 2 col on tablet, 3 col on desktop */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-black/5 text-[#2F7317] dark:bg-white/5 dark:text-[#B8F27C]">
               <Wallet size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Monthly Contribution
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("invest.monthlyContribution")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold">
-              {formatInvestmentCurrency(contribution)}
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              {formatPrice(contribution)}
             </h2>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-[#B8F27C]">
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-black/5 text-[#2F7317] dark:bg-white/5 dark:text-[#B8F27C]">
               <PiggyBank size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Total Contributions
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("invest.totalContributions")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold">
-              {formatInvestmentCurrency(
-                finalProjection.contributed
-              )}
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              {formatPrice(finalProjection.contributed)}
             </h2>
           </div>
 
-          <div className="rounded-2xl border border-[#B8F27C]/20 bg-[#B8F27C]/10 p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#B8F27C]/15 text-[#B8F27C]">
+          <div className="rounded-2xl border border-[#3B871D]/25 bg-[#B8F27C]/30 p-5 sm:p-6 shadow-xs transition sm:col-span-2 lg:col-span-1 dark:border-[#B8F27C]/20 dark:bg-[#B8F27C]/10">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/60 text-[#1F5410] dark:bg-[#B8F27C]/15 dark:text-[#B8F27C]">
               <TrendingUp size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Estimated Future Value
+            <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">
+              {t("invest.estimatedValue")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold text-[#B8F27C]">
-              {formatInvestmentCurrency(
-                finalProjection.investmentValue
-              )}
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-[#1C4E10] dark:text-[#B8F27C]">
+              {formatPrice(finalProjection.investmentValue)}
             </h2>
           </div>
         </section>
 
-        {/* Investment settings */}
-        <section className="mt-8 grid grid-cols-2 gap-5">
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
+        {/* Investment settings: 1 col on mobile, 2 col on desktop */}
+        <section className="mt-6 sm:mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
             <div className="mb-5">
-              <h2 className="text-lg font-semibold">
-                Investment Settings
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                {t("invest.settingsTitle")}
               </h2>
-              <p className="mt-1 text-sm text-gray-400">
-                Customize your monthly contribution and return assumption.
+              <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {t("invest.settingsDesc")}
               </p>
             </div>
 
@@ -157,12 +158,12 @@ export default function InvestmentPage() {
               <div className="mb-3 flex items-center justify-between">
                 <label
                   htmlFor="monthly-contribution"
-                  className="text-sm text-gray-300"
+                  className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Monthly contribution
+                  {t("invest.monthlyContribution")}
                 </label>
-                <span className="font-semibold text-[#B8F27C]">
-                  {formatInvestmentCurrency(contribution)}
+                <span className="font-semibold text-sm sm:text-base text-[#2F7317] dark:text-[#B8F27C]">
+                  {formatPrice(contribution)}
                 </span>
               </div>
 
@@ -170,44 +171,31 @@ export default function InvestmentPage() {
                 id="monthly-contribution"
                 type="range"
                 min="0"
-                max={Math.max(
-                  500,
-                  Math.ceil(Math.max(potentialSavings, contribution) / 10) * 10
-                )}
-                step="5"
+                max={sliderMax}
+                step={step}
                 value={contribution}
                 onChange={(event) =>
                   setMonthlyContribution(Number(event.target.value))
                 }
-                className="w-full accent-[#B8F27C]"
+                className="w-full accent-[#2F7317] dark:accent-[#B8F27C]"
               />
 
-              <div className="mt-2 flex justify-between text-xs text-gray-500">
-                <span>$0</span>
-                <span>
-                  {formatInvestmentCurrency(
-                    Math.max(
-                      500,
-                      Math.ceil(
-                        Math.max(potentialSavings, contribution) / 10
-                      ) * 10
-                    )
-                  )}
-                </span>
+              <div className="mt-2 flex justify-between text-[11px] sm:text-xs text-gray-500">
+                <span>{formatPrice(0)}</span>
+                <span>{formatPrice(sliderMax)}</span>
               </div>
 
               <button
                 type="button"
                 onClick={() => setMonthlyContribution(null)}
-                className="mt-3 text-xs text-[#B8F27C] hover:underline"
+                className="mt-3 text-xs font-medium text-[#2F7317] hover:underline dark:text-[#B8F27C]"
               >
-                Reset to potential subscription savings
+                {t("invest.resetSavings")}
               </button>
 
               {potentialSavings === 0 && (
                 <p className="mt-3 text-xs text-gray-500">
-                  No cancellation savings selected yet. You can still
-                  adjust the contribution manually.
+                  {t("invest.noSavingsHelp")}
                 </p>
               )}
             </div>
@@ -216,11 +204,11 @@ export default function InvestmentPage() {
               <div className="mb-3 flex items-center justify-between">
                 <label
                   htmlFor="annual-return"
-                  className="text-sm text-gray-300"
+                  className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
-                  Assumed annual return
+                  {t("invest.assumedReturn")}
                 </label>
-                <span className="font-semibold text-[#B8F27C]">
+                <span className="font-semibold text-sm sm:text-base text-[#2F7317] dark:text-[#B8F27C]">
                   {annualReturn}%
                 </span>
               </div>
@@ -235,127 +223,136 @@ export default function InvestmentPage() {
                 onChange={(event) =>
                   setAnnualReturn(Number(event.target.value))
                 }
-                className="w-full accent-[#B8F27C]"
+                className="w-full accent-[#2F7317] dark:accent-[#B8F27C]"
               />
 
-              <div className="mt-2 flex justify-between text-xs text-gray-500">
+              <div className="mt-2 flex justify-between text-[11px] sm:text-xs text-gray-500">
                 <span>0%</span>
                 <span>15%</span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
-            <h2 className="text-lg font-semibold">
-              Investment Duration
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              {t("invest.durationTitle")}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              Choose how long you plan to invest.
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("invest.durationDesc")}
             </p>
 
-            <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="mt-6 grid grid-cols-3 gap-2.5 sm:gap-3">
               {periods.map((period) => (
                 <button
                   key={period}
                   type="button"
                   onClick={() => setYears(period)}
-                  className={`rounded-xl border px-4 py-4 text-center transition ${
+                  className={`rounded-xl border px-3 py-3 sm:px-4 sm:py-4 text-center transition ${
                     years === period
-                      ? "border-[#B8F27C] bg-[#B8F27C]/10 text-[#B8F27C]"
-                      : "border-white/10 bg-[#101713] text-gray-400 hover:border-white/30"
+                      ? "border-[#2F7317] bg-[#B8F27C]/20 text-[#1F5410] dark:border-[#B8F27C] dark:bg-[#B8F27C]/10 dark:text-[#B8F27C]"
+                      : "border-black/10 bg-black/[0.02] text-gray-600 hover:border-black/30 dark:border-white/10 dark:bg-[#101713] dark:text-gray-400 dark:hover:border-white/30"
                   }`}
                 >
-                  <span className="block text-2xl font-bold">
+                  <span className="block text-xl sm:text-2xl font-bold">
                     {period}
                   </span>
-                  <span className="text-xs">
-                    {period === 1 ? "Year" : "Years"}
+                  <span className="text-[10px] sm:text-xs">
+                    {period === 1 ? t("invest.year") : t("invest.years")}
                   </span>
                 </button>
               ))}
             </div>
 
-            <div className="mt-6 rounded-xl bg-[#101713] p-4">
-              <p className="text-sm text-gray-400">
-                Estimated investment profit
+            <div className="mt-6 rounded-xl border border-black/5 bg-black/[0.02] p-4 dark:border-white/5 dark:bg-[#101713]">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {t("invest.estimatedProfit")}
               </p>
-              <p className="mt-2 text-2xl font-bold text-[#B8F27C]">
-                {formatInvestmentCurrency(finalProjection.profit)}
+              <p className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-bold text-[#1C4E10] dark:text-[#B8F27C]">
+                {formatPrice(finalProjection.profit)}
               </p>
-              <p className="mt-1 text-xs text-gray-500">
-                Future value minus total contributions.
+              <p className="mt-1 text-[10px] sm:text-xs text-gray-500">
+                {t("invest.profitDesc")}
               </p>
             </div>
           </div>
         </section>
 
         {/* Growth chart */}
-        <section className="mt-8 rounded-2xl border border-white/10 bg-[#1B2720] p-6">
+        <section className="mt-6 sm:mt-8 rounded-2xl border border-black/10 bg-white p-4 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold">
-              Your Investment Projection
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              {t("invest.chartTitle")}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              Contributions compared with estimated investment value.
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("invest.chartDesc")}
             </p>
           </div>
 
-          <div className="h-80 w-full">
+          <div className="h-72 sm:h-80 w-full overflow-x-auto">
             {contribution === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                Increase your monthly contribution to see the growth chart.
+              <div className="flex h-full items-center justify-center text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+                {t("invest.emptyChart")}
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={chartData}
-                  margin={{ top: 10, right: 15, left: 10, bottom: 5 }}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
                 >
                   <CartesianGrid
-                    stroke="#344338"
+                    stroke={isDark ? "#344338" : "#E5E7EB"}
                     strokeDasharray="3 3"
                     vertical={false}
                   />
                   <XAxis
                     dataKey="year"
-                    stroke="#9AA89C"
+                    stroke={isDark ? "#9AA89C" : "#6B7280"}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => `${value}y`}
+                    tick={{ fontSize: 11 }}
                   />
                   <YAxis
-                    stroke="#9AA89C"
+                    stroke={isDark ? "#9AA89C" : "#6B7280"}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => {
+                      if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                      if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+                      return String(value);
+                    }}
+                    tick={{ fontSize: 11 }}
                   />
                   <Tooltip
                     formatter={(value, name) => [
-                      formatInvestmentCurrency(Number(value)),
+                      formatPrice(Number(value)),
                       name === "investmentValue"
-                        ? "Estimated value"
-                        : "Contributions",
+                        ? t("invest.chartEstimatedValue")
+                        : t("invest.chartTotalContributions"),
                     ]}
-                    labelFormatter={(value) => `Year ${value}`}
+                    labelFormatter={(value) =>
+                      t("invest.chartYearLabel", { year: String(value ?? "") })
+                    }
                     contentStyle={{
-                      backgroundColor: "#101713",
-                      border: "1px solid #344338",
+                      backgroundColor: isDark ? "#101713" : "#FFFFFF",
+                      border: isDark ? "1px solid #344338" : "1px solid #E5E7EB",
                       borderRadius: "12px",
-                      color: "#fff",
+                      color: isDark ? "#FFFFFF" : "#111A14",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                     }}
                   />
                   <Legend />
                   <Bar
                     dataKey="contributed"
-                    name="Total contributions"
-                    fill="#60796A"
+                    name={t("invest.chartTotalContributions")}
+                    fill={isDark ? "#60796A" : "#94A3B8"}
                     radius={[4, 4, 0, 0]}
                   />
                   <Line
                     type="monotone"
                     dataKey="investmentValue"
-                    name="Estimated investment value"
-                    stroke="#B8F27C"
+                    name={t("invest.chartEstimatedValue")}
+                    stroke={isDark ? "#B8F27C" : "#2F7317"}
                     strokeWidth={3}
                     dot={false}
                   />
@@ -366,16 +363,14 @@ export default function InvestmentPage() {
         </section>
 
         {/* Explanation */}
-        <section className="mt-8 flex gap-4 rounded-2xl border border-sky-400/20 bg-sky-400/5 p-5">
-          <Info className="mt-1 shrink-0 text-sky-300" size={20} />
+        <section className="mt-6 sm:mt-8 flex gap-3 sm:gap-4 rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4 sm:p-5">
+          <Info className="mt-0.5 sm:mt-1 shrink-0 text-sky-600 dark:text-sky-300" size={18} />
           <div>
-            <h3 className="font-semibold">Understanding this projection</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
-              This calculator assumes a constant annual return converted
-              into a monthly rate, with contributions made at the end of
-              each month. Real investments fluctuate. Actual results can
-              be higher or lower, including losses. Fees, taxes, and
-              inflation are not included.
+            <h3 className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white">
+              {t("invest.understandingTitle")}
+            </h3>
+            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+              {t("invest.understandingDesc")}
             </p>
           </div>
         </section>
@@ -383,9 +378,9 @@ export default function InvestmentPage() {
         <div className="mt-6">
           <Link
             href="/savings"
-            className="text-sm text-[#B8F27C] hover:underline"
+            className="text-xs sm:text-sm font-medium text-[#2F7317] hover:underline dark:text-[#B8F27C]"
           >
-            Review your subscription savings →
+            {t("invest.reviewSavingsLink")}
           </Link>
         </div>
       </div>

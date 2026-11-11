@@ -1,8 +1,37 @@
-
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  color-scheme: dark;
+  --bg-app: #f4f6f4;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-nested: #edf2ed;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --border-card: rgba(0, 0, 0, 0.09);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --text-main: #101713;
+  --text-muted: #596a5d;
+  --text-dim: #7d8f81;
+  --banner-bg: #eaf8dc;
+  --banner-border: rgba(52, 122, 34, 0.25);
+  --banner-text: #1d5214;
+}
+
+.dark {
+  --bg-app: #101713;
+  --bg-sidebar: #111a14;
+  --bg-card: #1b2720;
+  --bg-nested: #101713;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --border-card: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --text-main: #ffffff;
+  --text-muted: #9aa89c;
+  --text-dim: #6b7280;
+  --banner-bg: rgba(184, 242, 124, 0.1);
+  --banner-border: rgba(184, 242, 124, 0.2);
+  --banner-text: #b8f27c;
 }
 
 * {
@@ -11,7 +40,8 @@
 
 body {
   margin: 0;
-  background: #101713;
-  color: #f4f7f2;
+  background-color: var(--bg-app);
+  color: var(--text-main);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

@@ -1,4 +1,3 @@
-
 export type SubscriptionCategory =
   | "Streaming"
   | "Music"
@@ -8,6 +7,12 @@ export type SubscriptionCategory =
   | "Food Delivery"
   | "Shopping";
 
+export type RegionalPrice = {
+  USD: number;
+  JPY: number;
+  IDR: number;
+};
+
 export type Subscription = {
   id: string;
   name: string;
@@ -15,11 +20,14 @@ export type Subscription = {
   description: string;
   defaultPlan: string;
   defaultPrice: number;
+  prices?: RegionalPrice;
   billingCycle: "monthly" | "yearly";
   iconText: string;
+  regions?: ("US" | "JP" | "ID" | "GLOBAL")[];
 };
 
 export type UserSubscription = {
   subscriptionId: string;
   actualMonthlyPrice: number;
+  currency?: "USD" | "JPY" | "IDR";
 };

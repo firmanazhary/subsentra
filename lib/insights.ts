@@ -70,8 +70,11 @@ export function getCategoryBreakdown(selected: UserSubscription[]) {
 
 export function getSmartRecommendations(
   selected: UserSubscription[],
-  cancelledIds: string[]
+  cancelledIds: string[],
+  formatPriceFn?: (amount: number) => string,
+  tFn?: (key: string, params?: Record<string, string | number>) => string
 ): SmartRecommendation[] {
+  const format = formatPriceFn || currency;
   const details = getSubscriptionDetails(selected);
   const active = details.filter(
     (item) => !cancelledIds.includes(item.id)
@@ -84,12 +87,19 @@ export function getSmartRecommendations(
     (a, b) => b.monthlyPrice - a.monthlyPrice
   )[0];
 
-  if (mostExpensive && mostExpensive.monthlyPrice >= 15) {
+  if (mostExpensive && mostExpensive.monthlyPrice > 0) {
     recommendations.push({
-      title: "Review your most expensive subscription",
-      description: `${mostExpensive.name} costs ${currency(
-        mostExpensive.monthlyPrice
-      )} per month. Check whether you use it enough to justify the cost.`,
+      title: tFn
+        ? tFn("insights.recExpensiveTitle")
+        : "Review your most expensive subscription",
+      description: tFn
+        ? tFn("insights.recExpensiveDesc", {
+            name: mostExpensive.name,
+            price: format(mostExpensive.monthlyPrice),
+          })
+        : `${mostExpensive.name} costs ${format(
+            mostExpensive.monthlyPrice
+          )} per month. Check whether you use it enough to justify the cost.`,
       potentialSavings: mostExpensive.monthlyPrice,
       subscriptionId: mostExpensive.id,
     });
@@ -106,11 +116,21 @@ export function getSmartRecommendations(
   const topCategory = breakdown[0];
 
   if (topCategory && topCategory.percentage >= 40) {
+    const catName = tFn
+      ? tFn(`cat.${topCategory.category}`)
+      : topCategory.category;
     recommendations.push({
-      title: "Your spending is concentrated in one category",
-      description: `${topCategory.category} accounts for ${topCategory.percentage.toFixed(
-        0
-      )}% of your active subscription spending. Review whether you need every service in this category.`,
+      title: tFn
+        ? tFn("insights.recConcentratedTitle")
+        : "Your spending is concentrated in one category",
+      description: tFn
+        ? tFn("insights.recConcentratedDesc", {
+            category: catName,
+            percent: topCategory.percentage.toFixed(0),
+          })
+        : `${topCategory.category} accounts for ${topCategory.percentage.toFixed(
+            0
+          )}% of your active subscription spending. Review whether you need every service in this category.`,
       potentialSavings: 0,
     });
   }
@@ -126,9 +146,17 @@ export function getSmartRecommendations(
 
   categoryGroups.forEach((items, category) => {
     if (items.length >= 2) {
+      const catName = tFn ? tFn(`cat.${category}`) : category;
       recommendations.push({
-        title: `Review overlapping ${category} services`,
-        description: `You have ${items.length} subscriptions in ${category}. Check whether their features overlap.`,
+        title: tFn
+          ? tFn("insights.recOverlapTitle", { category: catName })
+          : `Review overlapping ${category} services`,
+        description: tFn
+          ? tFn("insights.recOverlapDesc", {
+              count: items.length,
+              category: catName,
+            })
+          : `You have ${items.length} subscriptions in ${category}. Check whether their features overlap.`,
         potentialSavings: Math.min(
           ...items.map((item) => item.monthlyPrice)
         ),
@@ -143,10 +171,17 @@ export function getSmartRecommendations(
 
   if (plannedSavings > 0) {
     recommendations.push({
-      title: "You have a savings plan in progress",
-      description: `Your selected cancellations could save ${currency(
-        plannedSavings
-      )} every month, or ${currency(plannedSavings * 12)} per year.`,
+      title: tFn
+        ? tFn("insights.recSavingsTitle")
+        : "You have a savings plan in progress",
+      description: tFn
+        ? tFn("insights.recSavingsDesc", {
+            monthly: format(plannedSavings),
+            annual: format(plannedSavings * 12),
+          })
+        : `Your selected cancellations could save ${format(
+            plannedSavings
+          )} every month, or ${format(plannedSavings * 12)} per year.`,
       potentialSavings: plannedSavings,
     });
   }
@@ -156,8 +191,11 @@ export function getSmartRecommendations(
 
 export function getSpendingInsights(
   selected: UserSubscription[],
-  cancelledIds: string[]
+  cancelledIds: string[],
+  formatPriceFn?: (amount: number) => string,
+  tFn?: (key: string, params?: Record<string, string | number>) => string
 ): SpendingInsight[] {
+  const format = formatPriceFn || currency;
   const active = selected.filter(
     (item) => !cancelledIds.includes(item.subscriptionId)
   );
@@ -174,9 +212,13 @@ export function getSpendingInsights(
   if (active.length === 0) {
     return [
       {
-        title: "No active spending to analyze",
-        description: "Add subscriptions or clear your cancellation selections to see your insights.",
-        value: "$0.00",
+        title: tFn
+          ? tFn("insights.noActiveSpending")
+          : "No active spending to analyze",
+        description: tFn
+          ? tFn("insights.noActiveSpendingDesc")
+          : "Add subscriptions or clear your cancellation selections to see your insights.",
+        value: format(0),
         type: "info",
       },
     ];
@@ -186,28 +228,44 @@ export function getSpendingInsights(
 
   if (top) {
     insights.push({
-      title: "Most expensive subscription",
-      description: `${top.name} is your highest monthly subscription cost.`,
-      value: currency(top.monthlyPrice),
+      title: tFn
+        ? tFn("insights.mostExpensive")
+        : "Most expensive subscription",
+      description: tFn
+        ? tFn("insights.mostExpensiveDesc", { name: top.name })
+        : `${top.name} is your highest monthly subscription cost.`,
+      value: format(top.monthlyPrice),
       type: "warning",
     });
   }
 
   if (topCategory) {
+    const catName = tFn
+      ? tFn(`cat.${topCategory.category}`)
+      : topCategory.category;
     insights.push({
-      title: "Top spending category",
-      description: `${topCategory.category} represents ${topCategory.percentage.toFixed(
-        0
-      )}% of your monthly subscription spending.`,
-      value: currency(topCategory.amount),
+      title: tFn ? tFn("insights.topCategory") : "Top spending category",
+      description: tFn
+        ? tFn("insights.topCategoryDesc", {
+            category: catName,
+            percent: topCategory.percentage.toFixed(0),
+          })
+        : `${topCategory.category} represents ${topCategory.percentage.toFixed(
+            0
+          )}% of your monthly subscription spending.`,
+      value: format(topCategory.amount),
       type: "info",
     });
   }
 
   insights.push({
-    title: "Projected annual spending",
-    description: "If your current monthly spending stays the same.",
-    value: currency(monthlyTotal * 12),
+    title: tFn
+      ? tFn("insights.projectedAnnual")
+      : "Projected annual spending",
+    description: tFn
+      ? tFn("insights.projectedAnnualDesc")
+      : "If your current monthly spending stays the same.",
+    value: format(monthlyTotal * 12),
     type: "positive",
   });
 

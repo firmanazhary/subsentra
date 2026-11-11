@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -14,16 +13,11 @@ import {
 import Sidebar from "@/components/sidebar";
 import { subscriptions } from "@/data/subscriptions";
 import { useSubscriptions } from "@/context/subscription-context";
+import { useI18n } from "@/context/i18n-context";
 import {
   calculateSavings,
   calculateRemainingSpending,
 } from "@/lib/calculations";
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
 
 export default function SavingsPage() {
   const {
@@ -32,13 +26,14 @@ export default function SavingsPage() {
     setCancelledIds,
     isLoaded,
   } = useSubscriptions();
+  const { t, formatPrice } = useI18n();
 
   const [investmentRate, setInvestmentRate] = useState(8);
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#101713] p-10 text-white">
-        Loading savings simulator...
+      <div className="flex min-h-screen items-center justify-center bg-[#F4F6F4] p-10 text-gray-900 transition-colors dark:bg-[#101713] dark:text-white">
+        {t("savings.loading")}
       </div>
     );
   }
@@ -76,93 +71,92 @@ export default function SavingsPage() {
   const projections = [1, 3, 5];
 
   return (
-    <main className="min-h-screen bg-[#101713] text-white">
+    <main className="min-h-screen bg-[#F4F6F4] text-gray-900 transition-colors duration-200 dark:bg-[#101713] dark:text-white">
       <Sidebar />
 
-      <div className="ml-64 p-8">
-        <div className="mb-8">
+      <div className="ml-0 min-w-0 p-4 pt-20 sm:p-6 sm:pt-22 lg:ml-64 lg:p-8 lg:pt-8 transition-all">
+        <div className="mb-6 sm:mb-8">
           <Link
             href="/"
-            className="mb-5 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-[#B8F27C]"
+            className="mb-4 sm:mb-5 inline-flex items-center gap-2 text-xs sm:text-sm text-gray-500 transition hover:text-[#2F7317] dark:text-gray-400 dark:hover:text-[#B8F27C]"
           >
             <ArrowLeft size={16} />
-            Back to Dashboard
+            {t("savings.back")}
           </Link>
 
-          <p className="text-sm font-medium text-[#B8F27C]">
-            SMART SAVINGS
+          <p className="text-xs sm:text-sm font-semibold text-[#2F7317] dark:text-[#B8F27C]">
+            {t("savings.badge")}
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold">
-            Savings Simulator
+          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            {t("savings.title")}
           </h1>
 
-          <p className="mt-2 text-gray-400">
-            Find subscriptions you can live without and see how much
-            you could save.
+          <p className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            {t("savings.subtitle")}
           </p>
         </div>
 
         {/* Savings summary */}
-        <section className="grid grid-cols-3 gap-5">
-          <div className="rounded-2xl border border-[#B8F27C]/20 bg-[#1B2720] p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#B8F27C]/10 text-[#B8F27C]">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5">
+          <div className="rounded-2xl border border-[#3B871D]/25 bg-[#B8F27C]/30 p-5 sm:p-6 shadow-xs transition dark:border-[#B8F27C]/20 dark:bg-[#1B2720]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/60 text-[#1F5410] dark:bg-[#B8F27C]/10 dark:text-[#B8F27C]">
               <PiggyBank size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Potential Monthly Savings
+            <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-400">
+              {t("savings.potentialMonthly")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold text-[#B8F27C]">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-[#1C4E10] dark:text-[#B8F27C]">
               {formatPrice(monthlySavings)}
             </h2>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-white">
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-black/5 text-gray-800 dark:bg-white/5 dark:text-white">
               <CircleDollarSign size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Potential Annual Savings
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("savings.potentialAnnual")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {formatPrice(annualSavings)}
             </h2>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#1B2720] p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-white">
+          <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition sm:col-span-2 lg:col-span-1 dark:border-white/10 dark:bg-[#1B2720]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-black/5 text-gray-800 dark:bg-white/5 dark:text-white">
               <TrendingUp size={22} />
             </div>
-            <p className="text-sm text-gray-400">
-              Spending After Cancellation
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("savings.spendingAfter")}
             </p>
-            <h2 className="mt-2 text-3xl font-bold">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               {formatPrice(remainingSpending)}
             </h2>
           </div>
         </section>
 
         {/* Subscription selection */}
-        <section className="mt-8 rounded-2xl border border-white/10 bg-[#1B2720] p-6">
+        <section className="mt-6 sm:mt-8 rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-white/10 dark:bg-[#1B2720]">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold">
-              Review Your Subscriptions
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              {t("savings.reviewTitle")}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
-              Select the subscriptions you are considering cancelling.
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("savings.reviewDesc")}
             </p>
           </div>
 
           {selected.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-gray-400">
-                {"You haven't added any subscriptions yet."}
+              <p className="text-gray-500 dark:text-gray-400">
+                {t("savings.empty")}
               </p>
               <Link
                 href="/subscriptions"
-                className="mt-4 inline-block rounded-xl bg-[#B8F27C] px-5 py-3 text-sm font-semibold text-[#101713] transition hover:bg-[#c9ff8d]"
+                className="mt-4 inline-block rounded-xl bg-[#B8F27C] px-5 py-3 text-sm font-semibold text-[#101713] shadow-xs transition hover:bg-[#c9ff8d]"
               >
-                Add Subscriptions
+                {t("savings.addBtn")}
               </Link>
             </div>
           ) : (
@@ -182,40 +176,40 @@ export default function SavingsPage() {
                     key={sub.id}
                     type="button"
                     onClick={() => toggleCancellation(sub.id)}
-                    className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition ${
+                    className={`flex w-full items-center justify-between rounded-xl border p-3.5 sm:p-4 text-left transition ${
                       isCancelled
-                        ? "border-[#B8F27C]/40 bg-[#B8F27C]/10"
-                        : "border-white/10 bg-[#101713] hover:border-white/20"
+                        ? "border-[#3B871D]/40 bg-[#B8F27C]/20 text-gray-900 dark:border-[#B8F27C]/40 dark:bg-[#B8F27C]/10 dark:text-white"
+                        : "border-black/10 bg-black/[0.02] hover:border-black/20 dark:border-white/10 dark:bg-[#101713] dark:hover:border-white/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 font-bold text-[#B8F27C]">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-black/5 font-bold text-[#2F7317] dark:bg-white/5 dark:text-[#B8F27C]">
                         {sub.iconText}
                       </div>
 
                       <div>
-                        <p className="font-medium">{sub.name}</p>
-                        <p className="mt-1 text-xs text-gray-400">
-                          {sub.category}
+                        <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white">{sub.name}</p>
+                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                          {t(`cat.${sub.category}`)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-3 sm:gap-5">
                       <div className="text-right">
-                        <p className="font-semibold">
+                        <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                           {formatPrice(item.actualMonthlyPrice)}
                         </p>
-                        <p className="text-xs text-gray-500">/ month</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500">/ month</p>
                       </div>
 
                       {isCancelled ? (
                         <CheckCircle2
-                          className="text-[#B8F27C]"
-                          size={22}
+                          className="text-[#2F7317] dark:text-[#B8F27C]"
+                          size={20}
                         />
                       ) : (
-                        <div className="h-5 w-5 rounded-full border border-gray-500" />
+                        <div className="h-5 w-5 rounded-full border border-gray-400 dark:border-gray-500" />
                       )}
                     </div>
                   </button>
@@ -225,37 +219,37 @@ export default function SavingsPage() {
           )}
 
           {selected.length > 0 && (
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5">
-              <p className="text-sm text-gray-400">
-                {cancelledIds.filter((id) =>
-                  selected.some((item) => item.subscriptionId === id)
-                ).length}{" "}
-                subscription(s) selected for cancellation
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-4 sm:pt-5 dark:border-white/10">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {t("savings.selectedCount", {
+                  count: cancelledIds.filter((id) =>
+                    selected.some((item) => item.subscriptionId === id)
+                  ).length,
+                })}
               </p>
 
               <button
                 type="button"
                 onClick={() => setCancelledIds([])}
-                className="text-sm text-gray-400 transition hover:text-white"
+                className="text-xs sm:text-sm text-gray-500 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               >
-                Clear selection
+                {t("savings.clearSelection")}
               </button>
             </div>
           )}
         </section>
 
         {/* Investment projection */}
-        <section className="mt-8 rounded-2xl border border-[#B8F27C]/20 bg-[#1B2720] p-6">
+        <section className="mt-6 sm:mt-8 rounded-2xl border border-black/10 bg-white p-5 sm:p-6 shadow-xs transition dark:border-[#B8F27C]/20 dark:bg-[#1B2720]">
           <div className="mb-6">
-            <p className="text-sm font-medium text-[#B8F27C]">
-              WHAT IF YOU INVESTED IT?
+            <p className="text-xs sm:text-sm font-semibold text-[#2F7317] dark:text-[#B8F27C]">
+              {t("savings.investBadge")}
             </p>
-            <h2 className="mt-2 text-xl font-semibold">
-              Turn savings into future wealth
+            <h2 className="mt-1 sm:mt-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              {t("savings.investTitle")}
             </h2>
-            <p className="mt-2 text-sm text-gray-400">
-              Estimate what your monthly savings could grow into if
-              invested consistently.
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {t("savings.investDesc")}
             </p>
           </div>
 
@@ -263,11 +257,11 @@ export default function SavingsPage() {
             <div className="mb-2 flex items-center justify-between">
               <label
                 htmlFor="investment-rate"
-                className="text-sm text-gray-400"
+                className="text-xs sm:text-sm text-gray-600 dark:text-gray-400"
               >
-                Assumed annual return
+                {t("savings.assumedReturn")}
               </label>
-              <span className="font-semibold text-[#B8F27C]">
+              <span className="font-semibold text-[#2F7317] dark:text-[#B8F27C]">
                 {investmentRate}%
               </span>
             </div>
@@ -282,7 +276,7 @@ export default function SavingsPage() {
               onChange={(event) =>
                 setInvestmentRate(Number(event.target.value))
               }
-              className="w-full accent-[#B8F27C]"
+              className="w-full accent-[#2F7317] dark:accent-[#B8F27C]"
             />
 
             <div className="flex justify-between text-xs text-gray-500">
@@ -291,36 +285,34 @@ export default function SavingsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {projections.map((years) => (
               <div
                 key={years}
-                className="rounded-xl border border-white/10 bg-[#101713] p-5"
+                className="rounded-xl border border-black/10 bg-black/[0.02] p-4 sm:p-5 dark:border-white/10 dark:bg-[#101713]"
               >
-                <p className="text-sm text-gray-400">
-                  After {years} {years === 1 ? "year" : "years"}
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  {years === 1
+                    ? t("savings.afterYear", { years })
+                    : t("savings.afterYears", { years })}
                 </p>
-                <p className="mt-3 text-2xl font-bold text-[#B8F27C]">
+                <p className="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-[#2F7317] dark:text-[#B8F27C]">
                   {formatPrice(calculateFutureValue(years))}
                 </p>
-                <p className="mt-2 text-xs text-gray-500">
-                  Estimated future value
+                <p className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-500">
+                  {t("savings.estimatedValue")}
                 </p>
               </div>
             ))}
           </div>
 
-          <p className="mt-5 text-xs leading-relaxed text-gray-500">
-            Illustrative estimate only. Assumes monthly contributions,
-            monthly compounding, and a constant annual return. Actual
-            investment returns are not guaranteed and may be negative.
-            Taxes, fees, and inflation are not included.
+          <p className="mt-5 text-[11px] sm:text-xs leading-relaxed text-gray-500">
+            {t("savings.disclaimer")}
           </p>
         </section>
 
-        <p className="mt-6 text-xs leading-relaxed text-gray-500">
-          This tool only estimates potential savings. It does not
-          cancel subscriptions or contact service providers.
+        <p className="mt-6 text-[11px] sm:text-xs leading-relaxed text-gray-500">
+          {t("savings.toolDisclaimer")}
         </p>
       </div>
     </main>
