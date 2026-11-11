@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   CreditCard,
   TrendingUp,
+  Lightbulb,
   PiggyBank,
   Settings,
   Wallet,
@@ -16,7 +17,8 @@ const menuItems = [
   { name: "Overview", icon: LayoutDashboard, href: "/" },
   { name: "My Subscriptions", icon: CreditCard, href: "/subscriptions" },
   { name: "Savings Simulator", icon: TrendingUp, href: "/savings" },
-  { name: "Investment Growth", icon: PiggyBank, href: "/investment-growth" },
+  { name: "Insights", icon: Lightbulb, href: "/insights" },
+  { name: "Investment Growth", icon: PiggyBank, href: "/investment" },
 ];
 
 export default function Sidebar() {
