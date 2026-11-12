@@ -1,5 +1,5 @@
 
-import { subscriptions } from "@/data/subscriptions";
+import { findSubscription } from "@/data/subscriptions";
 import type { UserSubscription } from "@/types/subscription";
 
 // Convert yearly prices into monthly equivalents
@@ -51,13 +51,8 @@ export function calculateCategorySpending(
   const result: Record<string, number> = {};
 
   selected.forEach((item) => {
-    const subscription = subscriptions.find(
-      (sub) => sub.id === item.subscriptionId
-    );
-
-    if (!subscription) return;
-
-    const category = subscription.category;
+    const subscription = findSubscription(item.subscriptionId);
+    const category = subscription ? subscription.category : "Other";
 
     result[category] =
       (result[category] || 0) + item.actualMonthlyPrice;

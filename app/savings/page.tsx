@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import Sidebar from "@/components/sidebar";
-import { subscriptions } from "@/data/subscriptions";
+import { findSubscription } from "@/data/subscriptions";
 import { useSubscriptions } from "@/context/subscription-context";
 import { useI18n } from "@/context/i18n-context";
 import {
@@ -162,20 +162,19 @@ export default function SavingsPage() {
           ) : (
             <div className="space-y-3">
               {selected.map((item) => {
-                const sub = subscriptions.find(
-                  (subscription) =>
-                    subscription.id === item.subscriptionId
-                );
+                const sub = findSubscription(item.subscriptionId);
+                const subId = sub ? sub.id : item.subscriptionId;
+                const subName = sub ? sub.name : item.subscriptionId;
+                const subCategory = sub ? sub.category : "Other";
+                const iconText = sub ? sub.iconText : subName.charAt(0).toUpperCase();
 
-                if (!sub) return null;
-
-                const isCancelled = cancelledIds.includes(sub.id);
+                const isCancelled = cancelledIds.includes(subId);
 
                 return (
                   <button
-                    key={sub.id}
+                    key={subId}
                     type="button"
-                    onClick={() => toggleCancellation(sub.id)}
+                    onClick={() => toggleCancellation(subId)}
                     className={`flex w-full items-center justify-between rounded-xl border p-3.5 sm:p-4 text-left transition ${
                       isCancelled
                         ? "border-[#3B871D]/40 bg-[#B8F27C]/20 text-gray-900 dark:border-[#B8F27C]/40 dark:bg-[#B8F27C]/10 dark:text-white"
@@ -184,13 +183,13 @@ export default function SavingsPage() {
                   >
                     <div className="flex items-center gap-3 sm:gap-4">
                       <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-black/5 font-bold text-[#2F7317] dark:bg-white/5 dark:text-[#B8F27C]">
-                        {sub.iconText}
+                        {iconText}
                       </div>
 
                       <div>
-                        <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white">{sub.name}</p>
+                        <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white">{subName}</p>
                         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                          {t(`cat.${sub.category}`)}
+                          {t(`cat.${subCategory}`)}
                         </p>
                       </div>
                     </div>

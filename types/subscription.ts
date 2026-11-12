@@ -5,7 +5,26 @@ export type SubscriptionCategory =
   | "Cloud Storage"
   | "Fitness"
   | "Food Delivery"
-  | "Shopping";
+  | "Food"
+  | "Shopping"
+  | "Developer"
+  | "Productivity"
+  | "Design"
+  | "Gaming"
+  | "Communication"
+  | "Education"
+  | "Finance"
+  | "Lifestyle"
+  | "News"
+  | "Business"
+  | "Books"
+  | "Security"
+  | "Utility"
+  | "Health"
+  | "Art"
+  | "Social"
+  | "Publishing"
+  | (string & {});
 
 export type RegionalPrice = {
   USD: number;

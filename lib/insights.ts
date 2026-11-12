@@ -1,5 +1,5 @@
 
-import { subscriptions } from "@/data/subscriptions";
+import { findSubscription } from "@/data/subscriptions";
 import type { UserSubscription } from "@/types/subscription";
 
 export type SpendingInsight = {
@@ -25,15 +25,22 @@ const currency = (amount: number) =>
 export function getSubscriptionDetails(selected: UserSubscription[]) {
   return selected
     .map((item) => {
-      const subscription = subscriptions.find(
-        (sub) => sub.id === item.subscriptionId
-      );
+      const subscription = findSubscription(item.subscriptionId);
 
       return subscription
         ? { ...subscription, monthlyPrice: item.actualMonthlyPrice }
-        : null;
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null);
+        : {
+            id: item.subscriptionId,
+            name: item.subscriptionId,
+            category: "Other",
+            description: "",
+            defaultPlan: "Custom",
+            defaultPrice: item.actualMonthlyPrice,
+            billingCycle: "monthly" as const,
+            iconText: item.subscriptionId.charAt(0).toUpperCase(),
+            monthlyPrice: item.actualMonthlyPrice,
+          };
+    });
 }
 
 export function getTopSubscription(selected: UserSubscription[]) {

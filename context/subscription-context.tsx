@@ -15,7 +15,7 @@ import {
 import type { UserSubscription } from "@/types/subscription";
 import type { Currency } from "@/types/i18n";
 import { useI18n } from "@/context/i18n-context";
-import { subscriptions } from "@/data/subscriptions";
+import { findSubscription } from "@/data/subscriptions";
 
 type SubscriptionContextType = {
   selected: UserSubscription[];
@@ -27,13 +27,6 @@ type SubscriptionContextType = {
 
 const SubscriptionContext =
   createContext<SubscriptionContextType | undefined>(undefined);
-
-const DEFAULT_INITIAL_SUBS: { id: string; priceUSD: number }[] = [
-  { id: "netflix", priceUSD: 19.99 },
-  { id: "spotify", priceUSD: 12.99 },
-  { id: "chatgpt", priceUSD: 20.0 },
-  { id: "youtube-premium", priceUSD: 13.99 },
-];
 
 export function SubscriptionProvider({
   children,
@@ -47,7 +40,7 @@ export function SubscriptionProvider({
 
   const prevCurrencyRef = useRef<Currency | null>(null);
 
-  // Load data from LocalStorage (or initialize with realistic defaults)
+  // Load data from LocalStorage and sanitize / auto-migrate any outdated IDs
   useEffect(() => {
     try {
       const saved = localStorage.getItem("subsentry");
@@ -55,12 +48,19 @@ export function SubscriptionProvider({
       if (saved) {
         const parsed = JSON.parse(saved);
 
+        const sanitizeList = (list: UserSubscription[]) => {
+          return list.map((item) => {
+            const found = findSubscription(item.subscriptionId);
+            return found ? { ...item, subscriptionId: found.id } : item;
+          });
+        };
+
         queueMicrotask(() => {
           if (Array.isArray(parsed)) {
-            setSelected(parsed);
+            setSelected(sanitizeList(parsed));
           } else {
             if (Array.isArray(parsed.selected)) {
-              setSelected(parsed.selected);
+              setSelected(sanitizeList(parsed.selected));
             }
             if (Array.isArray(parsed.cancelledIds)) {
               setCancelledIds(parsed.cancelledIds);
@@ -68,25 +68,18 @@ export function SubscriptionProvider({
           }
         });
       } else {
-        // Initialize first-time users with popular subscriptions in current regional currency
-        const initialSelected: UserSubscription[] = DEFAULT_INITIAL_SUBS.map((item) => {
-          const sub = subscriptions.find((s) => s.id === item.id);
-          const price =
-            sub?.prices?.[currency] ??
-            (currency === "USD" ? item.priceUSD : convertFromUSD(item.priceUSD, currency));
-          return {
-            subscriptionId: item.id,
-            actualMonthlyPrice: price,
-            currency,
-          };
-        });
-
+        // Clean default: 0 subscriptions on fresh start
         queueMicrotask(() => {
-          setSelected(initialSelected);
+          setSelected([]);
+          setCancelledIds([]);
         });
       }
     } catch {
       localStorage.removeItem("subsentry");
+      queueMicrotask(() => {
+        setSelected([]);
+        setCancelledIds([]);
+      });
     } finally {
       queueMicrotask(() => {
         setIsLoaded(true);
@@ -111,7 +104,8 @@ export function SubscriptionProvider({
     queueMicrotask(() => {
       setSelected((prevSelected) => {
         return prevSelected.map((item) => {
-          const sub = subscriptions.find((s) => s.id === item.subscriptionId);
+          const sub = findSubscription(item.subscriptionId);
+          if (!sub) return item;
           if (!sub) return item;
 
           const fromCurr = item.currency || prevCurr;

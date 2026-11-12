@@ -2,7 +2,7 @@
 
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { subscriptions } from "@/data/subscriptions";
+import { findSubscription } from "@/data/subscriptions";
 import { useSubscriptions } from "@/context/subscription-context";
 import { useI18n } from "@/context/i18n-context";
 
@@ -34,28 +34,27 @@ export default function SubscriptionList() {
 
       <div className="space-y-3 sm:space-y-4">
         {selected.map((item) => {
-          const sub = subscriptions.find(
-            (s) => s.id === item.subscriptionId
-          );
-
-          if (!sub) return null;
+          const sub = findSubscription(item.subscriptionId);
+          const displayName = sub ? sub.name : item.subscriptionId;
+          const displayCategory = sub ? sub.category : "Other";
+          const iconText = sub ? sub.iconText : displayName.charAt(0).toUpperCase();
 
           return (
             <div
-              key={sub.id}
+              key={item.subscriptionId}
               className="flex items-center justify-between border-b border-black/5 pb-3 sm:pb-4 last:border-0 dark:border-white/5"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-black/5 font-bold text-[#2F7317] dark:bg-white/5 dark:text-[#B8F27C]">
-                  {sub.iconText}
+                  {iconText}
                 </div>
 
                 <div>
                   <p className="font-medium text-xs sm:text-sm text-gray-900 dark:text-white">
-                    {sub.name}
+                    {displayName}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
-                    {t(`cat.${sub.category}`)}
+                    {t(`cat.${displayCategory}`)}
                   </p>
                 </div>
               </div>

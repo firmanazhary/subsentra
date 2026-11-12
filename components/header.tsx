@@ -20,25 +20,36 @@ export default function Header() {
   const [currentDateStr, setCurrentDateStr] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Dynamic localized date
+  // Live real-time localized date and ticking clock
   useEffect(() => {
-    try {
-      const locale = language === "ja" ? "ja-JP" : language === "id" ? "id-ID" : "en-US";
-      const formatted = new Intl.DateTimeFormat(locale, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }).format(new Date());
+    const updateTime = () => {
+      try {
+        const now = new Date();
+        const locale = language === "ja" ? "ja-JP" : language === "id" ? "id-ID" : "en-US";
 
-      queueMicrotask(() => {
-        setCurrentDateStr(formatted);
-      });
-    } catch {
-      queueMicrotask(() => {
+        const dateStr = new Intl.DateTimeFormat(locale, {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }).format(now);
+
+        const timeStr = new Intl.DateTimeFormat(locale, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: language === "en",
+        }).format(now);
+
+        setCurrentDateStr(`${dateStr} · ${timeStr}`);
+      } catch {
         setCurrentDateStr("");
-      });
-    }
+      }
+    };
+
+    updateTime();
+    const intervalId = setInterval(updateTime, 1000);
+    return () => clearInterval(intervalId);
   }, [language]);
 
   // Close dropdown when clicking outside
@@ -63,9 +74,15 @@ export default function Header() {
   return (
     <header className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          {currentDateStr || t("header.date")}
-        </p>
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          <p className="tabular-nums font-medium tracking-tight">
+            {currentDateStr || (language === "id" ? "Memuat waktu..." : language === "ja" ? "読み込み中..." : "Loading time...")}
+          </p>
+        </div>
 
         <h1 className="mt-1 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           {t("header.tagline")}
