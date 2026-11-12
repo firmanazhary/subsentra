@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useMemo, useState, useRef, useCallback, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -11,7 +11,7 @@ import {
   ChevronRight,
   SlidersHorizontal,
   Layers,
-  Sparkles,
+  CheckSquare,
 } from "lucide-react";
 import { useSubscriptions } from "@/context/subscription-context";
 import { useI18n } from "@/context/i18n-context";
@@ -37,6 +37,44 @@ export default function SubscriptionSelector() {
   const [pageSize, setPageSize] = useState(12);
 
   const catalogTopRef = useRef<HTMLDivElement>(null);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkCategoryScroll = useCallback(() => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const hasOverflow = el.scrollWidth > el.clientWidth;
+    setCanScrollLeft(hasOverflow && el.scrollLeft > 6);
+    setCanScrollRight(
+      hasOverflow && el.scrollLeft < el.scrollWidth - el.clientWidth - 6
+    );
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkCategoryScroll();
+    }, 60);
+
+    window.addEventListener("resize", checkCategoryScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", checkCategoryScroll);
+    };
+  }, [checkCategoryScroll]);
+
+  const scrollCategories = (direction: "left" | "right") => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const scrollAmount = direction === "left" ? -280 : 280;
+    el.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  };
+
+  const handleCategoryWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (categoryScrollRef.current && Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+      categoryScrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
 
   const { selected, setSelected, isLoaded } = useSubscriptions();
   const { t, formatPrice, currency, convertFromUSD } = useI18n();
@@ -300,7 +338,7 @@ export default function SubscriptionSelector() {
               : "border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           }`}
         >
-          <Sparkles size={18} />
+          <CheckSquare size={18} />
           <span>{t("subs.tabSelected")}</span>
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-bold transition ${
@@ -421,38 +459,87 @@ export default function SubscriptionSelector() {
             </div>
           </div>
 
-          {/* Categories: Horizontal Scrollable Chips with category count */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 pt-1 no-scrollbar scroll-smooth">
-            {categoryList.map((category) => {
-              const count =
-                category === "All"
-                  ? subscriptions.length
-                  : categoryCounts[category] || 0;
-              const isCatActive = activeCategory === category;
+          {/* Categories: Handsome Horizontal Scroll with Gradient Fade & Nav Buttons */}
+          <div className="relative group">
+            {/* Left fade gradient + Chevron button */}
+            <div
+              className={`pointer-events-none absolute left-0 top-0 bottom-0 z-10 flex items-center pl-0.5 pr-8 bg-gradient-to-r from-[#F4F6F4] via-[#F4F6F4]/90 to-transparent dark:from-[#101713] dark:via-[#101713]/90 dark:to-transparent transition-opacity duration-200 ${
+                canScrollLeft ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => scrollCategories("left")}
+                disabled={!canScrollLeft}
+                className="pointer-events-auto flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border border-black/10 bg-white/95 text-gray-700 shadow-md backdrop-blur-xs transition hover:scale-105 hover:bg-white hover:text-[#2F7317] dark:border-white/15 dark:bg-[#1B2720]/95 dark:text-gray-200 dark:hover:bg-[#1B2720] dark:hover:text-[#B8F27C] cursor-pointer"
+                aria-label="Scroll categories left"
+              >
+                <ChevronLeft size={16} />
+              </button>
+            </div>
 
-              return (
-                <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs sm:text-sm transition flex items-center gap-1.5 ${
-                    isCatActive
-                      ? "bg-[#B8F27C] font-semibold text-[#142018] shadow-xs"
-                      : "border border-black/10 bg-white text-gray-600 hover:bg-black/5 dark:border-white/10 dark:bg-[#1B2720] dark:text-gray-400 dark:hover:bg-white/5"
-                  }`}
-                >
-                  <span>{t(`cat.${category}`)}</span>
-                  <span
-                    className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+            {/* Right fade gradient + Chevron button */}
+            <div
+              className={`pointer-events-none absolute right-0 top-0 bottom-0 z-10 flex items-center pr-0.5 pl-8 justify-end bg-gradient-to-l from-[#F4F6F4] via-[#F4F6F4]/90 to-transparent dark:from-[#101713] dark:via-[#101713]/90 dark:to-transparent transition-opacity duration-200 ${
+                canScrollRight ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => scrollCategories("right")}
+                disabled={!canScrollRight}
+                className="pointer-events-auto flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full border border-black/10 bg-white/95 text-gray-700 shadow-md backdrop-blur-xs transition hover:scale-105 hover:bg-white hover:text-[#2F7317] dark:border-white/15 dark:bg-[#1B2720]/95 dark:text-gray-200 dark:hover:bg-[#1B2720] dark:hover:text-[#B8F27C] cursor-pointer"
+                aria-label="Scroll categories right"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            {/* Category chips scroll area */}
+            <div
+              ref={categoryScrollRef}
+              onScroll={checkCategoryScroll}
+              onWheel={handleCategoryWheel}
+              className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-2 px-1 custom-scrollbar scroll-smooth"
+            >
+              {categoryList.map((category) => {
+                const count =
+                  category === "All"
+                    ? subscriptions.length
+                    : categoryCounts[category] || 0;
+                const isCatActive = activeCategory === category;
+
+                return (
+                  <button
+                    key={category}
+                    onClick={(e) => {
+                      handleCategoryChange(category);
+                      e.currentTarget.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                        inline: "center",
+                      });
+                    }}
+                    className={`group/chip shrink-0 rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition flex items-center gap-1.5 cursor-pointer ${
                       isCatActive
-                        ? "bg-[#142018]/15 text-[#142018]"
-                        : "bg-black/5 text-gray-500 dark:bg-white/10 dark:text-gray-400"
+                        ? "bg-[#2F7317] text-white shadow-xs ring-1 ring-[#2F7317]/30 dark:bg-[#B8F27C] dark:text-[#142018] dark:shadow-[0_0_12px_rgba(184,242,124,0.3)]"
+                        : "border border-black/10 bg-white/90 text-gray-600 hover:bg-white hover:text-gray-900 hover:border-black/20 dark:border-white/10 dark:bg-[#1B2720]/90 dark:text-gray-400 dark:hover:bg-[#1B2720] dark:hover:text-white dark:hover:border-white/20"
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{t(`cat.${category}`)}</span>
+                    <span
+                      className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold transition ${
+                        isCatActive
+                          ? "bg-white/25 text-white dark:bg-[#142018]/20 dark:text-[#142018]"
+                          : "bg-black/5 text-gray-500 group-hover/chip:text-gray-700 dark:bg-white/10 dark:text-gray-400 dark:group-hover/chip:text-gray-200"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Result Count Status Bar */}

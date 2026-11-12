@@ -641,9 +641,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const savedLang = localStorage.getItem("subsentry_lang") as Language | null;
-      const savedCurr = localStorage.getItem("subsentry_curr") as Currency | null;
-      const savedCountry = localStorage.getItem("subsentry_country") as CountryCode | null;
+      const savedLang = (localStorage.getItem("subsentra_lang") ||
+        localStorage.getItem("subsentry_lang")) as Language | null;
+      const savedCurr = (localStorage.getItem("subsentra_curr") ||
+        localStorage.getItem("subsentry_curr")) as Currency | null;
+      const savedCountry = (localStorage.getItem("subsentra_country") ||
+        localStorage.getItem("subsentry_country")) as CountryCode | null;
 
       queueMicrotask(() => {
         if (savedLang && (savedLang === "en" || savedLang === "ja" || savedLang === "id")) {
@@ -662,6 +665,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     try {
+      localStorage.setItem("subsentra_lang", lang);
       localStorage.setItem("subsentry_lang", lang);
     } catch {}
   }, []);
@@ -669,6 +673,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setCurrency = useCallback((curr: Currency) => {
     setCurrencyState(curr);
     try {
+      localStorage.setItem("subsentra_curr", curr);
       localStorage.setItem("subsentry_curr", curr);
     } catch {}
   }, []);
@@ -677,6 +682,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     (country: CountryCode) => {
       setSelectedCountryState(country);
       try {
+        localStorage.setItem("subsentra_country", country);
         localStorage.setItem("subsentry_country", country);
       } catch {}
 

@@ -23,7 +23,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("subsentry_theme") as Theme | null;
+      const saved = (localStorage.getItem("subsentra_theme") ||
+        localStorage.getItem("subsentry_theme")) as Theme | null;
       const initial = saved === "light" ? "light" : "dark";
 
       queueMicrotask(() => {
@@ -45,6 +46,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     try {
+      localStorage.setItem("subsentra_theme", newTheme);
       localStorage.setItem("subsentry_theme", newTheme);
     } catch {}
 

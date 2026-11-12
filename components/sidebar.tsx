@@ -53,7 +53,7 @@ export default function Sidebar() {
           <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-[#B8F27C]/15 p-1 shadow-xs">
             <Image
               src="/images/logo_subsentri.png"
-              alt="SubSentry Logo"
+              alt="SubSentra Logo"
               width={36}
               height={36}
               className="h-full w-full rounded-lg object-contain"
@@ -62,7 +62,7 @@ export default function Sidebar() {
           </div>
 
           <span className="text-lg font-bold text-gray-900 dark:text-white">
-            Sub<span className="text-[#3B871D] dark:text-[#B8F27C]">Sentry</span>
+            Sub<span className="text-[#3B871D] dark:text-[#B8F27C]">Sentra</span>
           </span>
         </Link>
 
@@ -102,7 +102,7 @@ export default function Sidebar() {
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-[#B8F27C]/15 p-1 shadow-sm transition group-hover:scale-105">
               <Image
                 src="/images/logo_subsentri.png"
-                alt="SubSentry Logo"
+                alt="SubSentra Logo"
                 width={40}
                 height={40}
                 className="h-full w-full rounded-lg object-contain"
@@ -111,7 +111,7 @@ export default function Sidebar() {
             </div>
 
             <span className="text-xl font-bold text-gray-900 dark:text-white">
-              Sub<span className="text-[#3B871D] dark:text-[#B8F27C]">Sentry</span>
+              Sub<span className="text-[#3B871D] dark:text-[#B8F27C]">Sentra</span>
             </span>
           </Link>
 

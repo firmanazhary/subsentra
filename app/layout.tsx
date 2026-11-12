@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SubSentry - Your Money, Under Control",
-  description: "Smart subscription manager, savings simulator, and investment growth tracker.",
+  title: "SubSentra - Your Money, Under Control",
+  description: "SubSentra: Smart subscription manager, savings simulator, and investment growth tracker.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

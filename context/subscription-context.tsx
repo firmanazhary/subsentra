@@ -43,7 +43,8 @@ export function SubscriptionProvider({
   // Load data from LocalStorage and sanitize / auto-migrate any outdated IDs
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("subsentry");
+      const saved =
+        localStorage.getItem("subsentra") || localStorage.getItem("subsentry");
 
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -155,13 +156,12 @@ export function SubscriptionProvider({
   useEffect(() => {
     if (!isLoaded) return;
 
-    localStorage.setItem(
-      "subsentry",
-      JSON.stringify({
-        selected,
-        cancelledIds,
-      })
-    );
+    const data = JSON.stringify({
+      selected,
+      cancelledIds,
+    });
+    localStorage.setItem("subsentra", data);
+    localStorage.setItem("subsentry", data);
   }, [selected, cancelledIds, isLoaded]);
 
   return (

@@ -1,19 +1,22 @@
-# SubSentry 🛡️
+# SubSentra 🛡️
 > **Your Money, Under Control.**  
 > Smart Subscription Manager, Savings Simulator, and Investment Growth Tracker.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-subsentra.vercel.app-2F7317?style=for-the-badge&logo=vercel)](https://subsentra.vercel.app/)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css)
 
+🌐 **Live Production**: [https://subsentra.vercel.app/](https://subsentra.vercel.app/)
+
 ---
 
 ## 🌟 Overview
 
-**SubSentry** is a modern, high-performance fintech personal finance dashboard tailored for tracking recurring subscriptions, discovering smart cost-cutting opportunities, and visualizing how saved funds can grow over time through compound investment.
+**SubSentra** is a modern, high-performance fintech personal finance dashboard tailored for tracking recurring subscriptions, discovering smart cost-cutting opportunities, and visualizing how saved funds can grow over time through compound investment.
 
-Built for global audiences with specialized focus on **United States**, **Japan**, and **Indonesia**, SubSentry provides native localization and official regional pricing models for 350+ subscription services.
+Built for global audiences with specialized focus on **United States**, **Japan**, and **Indonesia**, SubSentra provides native localization and official regional pricing models for 350+ subscription services.
 
 ---
 
@@ -31,12 +34,12 @@ Built for global audiences with specialized focus on **United States**, **Japan*
 * **350+ Services Catalog**: Spanning 24+ categories (Streaming, Music, AI Tools, Developer, Gaming, Education, Fitness, Finance, and more).
 * **Smart Pagination**: View 12, 24, or 48 services per page with smooth-scroll navigation and result counters.
 * **Region Tabs**: Filter by `🌐 Global`, `🇺🇸 United States`, `🇯🇵 Japan`, or `🇮🇩 Indonesia`.
-* **Category Pills**: Horizontally scrollable chips with live item count badges (e.g. `Streaming (47)`).
+* **Category Carousel / Scroll**: Sleek horizontal category bar with gradient edge fade masks, left/right navigation chevrons, vertical-to-horizontal wheel scrolling, and live count badges.
 * **Search & Sort**: Real-time search with instant clear button (`X`) and multi-mode sorting (Name A–Z / Z–A, Price Low–High / High–Low).
 * **Dual-Tab Workflow**: Seamlessly switch between **Browse Catalog** and **Selected Subscriptions**, with a quick `Clear All` reset button.
 
 ### 3. ⏱️ Live Real-Time Overview & Dashboard
-* **Real-Time Clock**: Live ticking clock with localized weekday, date, and pulsating live status indicator.
+* **Real-Time Clock**: Live ticking clock with localized weekday, date, hours, minutes, seconds, and pulsating live status indicator.
 * **Key Metrics**: Instant monthly recurring costs, projected annual spend, active subscription count, and potential monthly savings.
 * **Interactive Spending Chart**: Visual category distribution powered by Recharts with localized tooltips.
 
@@ -75,6 +78,7 @@ Built for global audiences with specialized focus on **United States**, **Japan*
 * **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 * **Charts**: [Recharts](https://recharts.org/)
 * **Icons**: [Lucide React](https://lucide.dev/)
+* **Deployment**: [Vercel](https://subsentra.vercel.app/)
 * **Storage**: Browser LocalStorage with automatic state sanitization and migration
 
 ---
@@ -82,7 +86,7 @@ Built for global audiences with specialized focus on **United States**, **Japan*
 ## 📁 Project Structure
 
 ```
-subsentry/
+subsentra/
 ├── app/
 │   ├── favicon.ico
 │   ├── icon.png                 # 32x32 Favicon
@@ -131,8 +135,8 @@ subsentry/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/firmanazhary/subsentry.git
-   cd subsentry
+   git clone https://github.com/firmanazhary/subsentra.git
+   cd subsentra
    ```
 
 2. **Install dependencies**:
@@ -146,7 +150,7 @@ subsentry/
    ```
 
 4. **Open in browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000).
+   Navigate to [http://localhost:3000](http://localhost:3000) or check the live version on [https://subsentra.vercel.app/](https://subsentra.vercel.app/).
 
 ### Available Scripts
 
